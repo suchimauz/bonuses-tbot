@@ -14,6 +14,7 @@
              [rest :as rest]
              [commands :as com]
              [db :as db]
+             [utils :as u]
              [migration :as migration]))
   (:gen-class))
 

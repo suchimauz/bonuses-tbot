@@ -15,6 +15,8 @@
         reply_markup {:inline_keyboard [[{:text "Перейти по ссылке"
                                           :url (str
                                                 (or (env :imm-host) "127.0.0.1")
+                                                (when-let [port (env :imm-port)]
+                                                  (str ":" port))
                                                 "/user/" id)}]]}]
     (reset! at id)
     (when-not user
