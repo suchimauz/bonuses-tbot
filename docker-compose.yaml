@@ -1,0 +1,17 @@
+version: '3.1'
+services:
+  db:
+    container_name: tbot
+    image: postgres:12.1
+    ports:
+      - "${PGPORT}:5432"
+    environment:
+      POSTGRES_USER:     ${PGUSER}
+      POSTGRES_PASSWORD: ${PGPASSWORD}
+      POSTGRES_DB:       ${PGDATABASE}
+    volumes:
+      - "./pgdata:/var/lib/postgresql/data"
+
+volumes:
+  pgdata:
+    driver: local
