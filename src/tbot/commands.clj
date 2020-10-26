@@ -1,6 +1,7 @@
 (ns tbot.commands
   (:require [morse.api :as t]
             [cheshire.core :as json]
+            [clj-yaml.core :as yaml]
             [clojure.java.io :as io]
             [environ.core :refer [env]]
             [clj-http.client :as http]
@@ -18,33 +19,31 @@
        db user/table
        (merge
         (select-keys chat [:username :first_name :last_name])
-        {:chat_id id
+        {:chat_id           id
          :send_notification false
-         :click_url false})))
-    (t/send-text token id {:reply_markup (u/reply-markup id "🔥 Крутить колесо 🔥")}
-                 (u/build-msg
-                  [["Приветствую тебя, " first_name " 😉"] []
-                   ["Я твой виртуальный помощник Jet Casino 🦾🤖"]
-                   ["Наша международная лицензия 📃"]
-                   ["еженедельные бонусные акции 🎁"]
-                   ["cashback до 10% ♻️"]
-                   ["а также турниры и лотереи с призовыми фондами вывели наше КАЗИНО на новый уровень! 🔝"] []
-                   ["Жми кнопку \"КРУТИТЬ КОЛЕСО\" и получи от нас ДВА стартовых ПОДАРКА!"]
-                   ["Искренне желаем космических побед 🪐🏅"]
-                   ["и огромных выигрышей 💰💰💰"]]))
-    (t/send-text token id {:reply_markup (u/reply-markup id "🎁 Забрать бонус 🎁")}
-                 (u/build-msg
-                  [["Мы уже подготовили для тебя МЕГА-КРУТЫЕ БОНУСЫ 🥳🥳🥳"] []
-                   ["Чтобы их забрать:"]
-                   ["1️⃣  Жми на кнопку ниже ⬇️"]
-                   ["2️⃣ Соверши простую регистрацию ✔️"]
-                   ["3️⃣ Пополни баланс всего от 200 рублей любым доступным способом"] []
-                   ["И бонус \"+100% К ПЕРВОМУ ДЕПОЗИТУ\" активируется автоматически!"]
-                   ["Погнали побеждать! 😉"]]))
-    (t/send-video
-     token id
-     {:reply_markup (json/generate-string (u/reply-markup id "Вперед за победами 🚀🏆"))
-      :duration "112"
-      :thumb (io/file "/resources/thumb.jpg")
-      :caption "Взгляни как люди побеждают на наших бонусах в виде бесплатных вращений ☺️"}
-     (io/file "/resources/video.mp4"))))
+         :click_url         false})))
+
+    (doseq [msg (yaml/parse-string (slurp (u/make-bf-path "bot.yaml")))]
+      (try
+        (case (:type msg)
+          "message" (cond->>
+                        (-> msg :message
+                            (u/make-bf-path)
+                            (slurp)
+                            (u/replace-first-name-in-msg first_name))
+                      (:button msg)       (t/send-text token id {:reply_markup (u/reply-markup id (:button msg))})
+                      (not (:button msg)) (t/send-text token id))
+          "video" (t/send-video
+                   token id
+                   (merge
+                    {}
+                    (when-let [button (:button msg)]
+                      {:reply_markup (json/generate-string (u/reply-markup id button))})
+                    (when-let [message (:message msg)]
+                      {:caption (-> message
+                                    (u/make-bf-path)
+                                    (slurp)
+                                    (u/replace-first-name-in-msg first_name))}))
+                   (io/file (u/make-bf-path (:file msg))))
+          nil)
+        (catch Exception e (str "caught exception: " (.getMessage e)))))))

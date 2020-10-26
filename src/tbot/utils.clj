@@ -4,6 +4,14 @@
             [clojure.string :as str]
             [honeysql.core :as hsql]))
 
+(defn replace-first-name-in-msg [text first-name]
+  (if text
+    (str/replace text #"\{\{name\}\}" first-name)
+    text))
+
+(defn make-bf-path [file]
+  (str (env :bot-files) file))
+
 (defn reply-markup [id text]
   {:inline_keyboard [[{:text text
                        :url (str

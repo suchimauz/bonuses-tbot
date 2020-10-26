@@ -18,6 +18,7 @@
                  [cheshire "5.10.0"]
                  [clj-http "3.9.1"]
 
+                 [clj-commons/clj-yaml "0.7.0"]
                  [org.clojure/data.codec    "0.1.1"]
                  [json-schema "0.2.0-RC11"]
                  [com.draines/postal        "2.0.3"]]
