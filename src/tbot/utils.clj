@@ -1,7 +1,16 @@
 (ns tbot.utils
   (:require [clj-pg.honey :as pg]
+            [environ.core :refer [env]]
             [clojure.string :as str]
             [honeysql.core :as hsql]))
+
+(defn reply-markup [id text]
+  {:inline_keyboard [[{:text text
+                       :url (str
+                             (or (env :bot-host) "127.0.0.1")
+                             (when-let [port (env :bot-port)]
+                               (str ":" port))
+                             "/user/" id)}]]})
 
 (defn new-table [resource validator]
   {:table     (keyword (str/lower-case (name resource)))

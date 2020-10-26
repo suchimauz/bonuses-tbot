@@ -15,6 +15,8 @@
                  [clj-pg              "0.0.3"]
                  [metosin/reitit-ring "0.3.10"]
                  [im.chit/cronj "1.4.4"]
+                 [cheshire "5.10.0"]
+                 [clj-http "3.9.1"]
 
                  [org.clojure/data.codec    "0.1.1"]
                  [json-schema "0.2.0-RC11"]

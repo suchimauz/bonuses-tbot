@@ -37,24 +37,24 @@
        (let [no-click-users (->> {:select [:*]
                                   :from [:user]
                                   :where [:and
-                                          [:= (hsql/raw "resource->>'click_url'") "false"]
-                                          [:= (hsql/raw "resource->>'send_notification'") "false"]
-                                          [:> (hsql/raw "(ts::timestamp + '1 minute')")
+                                          [:= (hsql/raw "resource->>'click_url'") (hsql/raw "'false'")]
+                                          [:= (hsql/raw "resource->>'send_notification'") (hsql/raw "'false'")]
+                                          [:< (hsql/raw "(cts::timestamp + '15 minute')")
                                            (hsql/raw "CURRENT_TIMESTAMP")]]}
-                                 (pg/query db))]
-         (map
-          (fn [{:keys [id] :as user}]
-            (t/send-text token (-> user :resource :chat_id)
-                         (u/build-msg
-                          [["Тук-тук, " (-> user :resource :first_name) "!"] []
-                           ["Ты не забрал бонусы для слотов, не забыл?"]
-                           ["Го крутить колесо по ссылке. Один оборот = фриспины и деньги на счёт."]
-                           []
-                           ["Желаю удачи!"]]))
-            (pg/update db user/table {:id id
-                                      :resource (-> user :resource (assoc :send_notification true))}))
-          no-click-users)))})
-   "0 * * * * *"))
+                                 (pg/query db))
+             _ (println no-click-users)]
+         (doall
+          (map
+           (fn [{:keys [id] :as user}]
+             (let [chat-id (-> user :resource :chat_id)]
+               (t/send-text token chat-id {:reply_markup (u/reply-markup chat-id "🎁 Забрать бонусы 🎁")}
+                            (u/build-msg
+                             [["❗️❗️❗️Ты забыл забрать свои бонусы❗️❗️❗️"]
+                              [" Возвращайся скорее, они уже ждут тебя в личном кабинете 🖥"]])))
+             (pg/update db user/table {:id id
+                                       :resource (-> user :resource (assoc :send_notification true))}))
+           no-click-users))))})
+   "0 * * * * * *"))
 
 (defn -main [& args]
   (let [db (db/connect)
