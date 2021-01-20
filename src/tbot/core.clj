@@ -21,7 +21,6 @@
 (def token (env :bot-token))
 
 (h/defhandler handler
-
   (h/command-fn "start" (partial com/start token)))
 
 (def channel (p/start token handler))
@@ -61,7 +60,7 @@
         cnj (cj/cronj)]
     (migration/migration db)
     (when (str/blank? token)
-      (println "Please provde token in BOT_TOKEN environment variable!")
+      (println "Please provide token in BOT_TOKEN environment variable!")
       (System/exit 1))
 
     (println "Starting the tbot")
