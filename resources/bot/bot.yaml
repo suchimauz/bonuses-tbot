@@ -2,10 +2,4 @@
   message: 'messages/1.txt'
 - type: message
   message: 'messages/2.txt'
-- type: message
-  message: 'messages/3.txt'
-  button: 'Spin&Win 🔥🚀'
-- type: video
-  message: 'messages/4.txt'
-  file: 'files/1.mp4'
-  button: 'Вперед за победами 🚀🏆'
+  button: 'Крутить колесо 🔥🚀'

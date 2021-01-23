@@ -21,7 +21,6 @@
 (def token (env :bot-token))
 
 (h/defhandler handler
-
   (h/command-fn "start" (partial com/start token)))
 
 (def channel (p/start token handler))
@@ -36,11 +35,7 @@
      (fn [dt opts]
        (let [no-click-users (->> {:select [:*]
                                   :from [:user]
-                                  :where [:and
-                                          [:= (hsql/raw "resource->>'click_url'") (hsql/raw "'false'")]
-                                          [:= (hsql/raw "resource->>'send_notification'") (hsql/raw "'false'")]
-                                          [:< (hsql/raw "(cts::timestamp + '15 minute')")
-                                           (hsql/raw "CURRENT_TIMESTAMP")]]}
+                                  :where [:= (hsql/raw "resource->>'click_url'") (hsql/raw "'false'")]}
                                  (pg/query db))
              _ (println no-click-users)]
          (doall
@@ -50,18 +45,18 @@
                (t/send-text token chat-id {:reply_markup (u/reply-markup chat-id "🎁 Забрать бонусы 🎁")}
                             (u/build-msg
                              [["❗️❗️❗️Ты забыл забрать свои бонусы❗️❗️❗️"]
-                              [" Возвращайся скорее, они уже ждут тебя в личном кабинете 🖥"]])))
+                              ["Забирай скорее, они уже ждут тебя в личном кабинете 🖥"]])))
              (pg/update db user/table {:id id
                                        :resource (-> user :resource (assoc :send_notification true))}))
            no-click-users))))})
-   "0 * * * * * *"))
+   "0 0 10,15,20 * * * *"))
 
 (defn -main [& args]
   (let [db (db/connect)
         cnj (cj/cronj)]
     (migration/migration db)
     (when (str/blank? token)
-      (println "Please provde token in BOT_TOKEN environment variable!")
+      (println "Please provide token in BOT_TOKEN environment variable!")
       (System/exit 1))
 
     (println "Starting the tbot")
