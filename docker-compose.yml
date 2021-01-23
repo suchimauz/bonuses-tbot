@@ -1,0 +1,33 @@
+version: '3.1'
+
+services:
+  tbot:
+    image: suchimauz/tbot:1.0.9
+    container_name: tbot
+    volumes:
+      - "./resources:/resources"
+    environment:
+      BOT_HOST: 'get-bonuses.click'
+      BOT_FILES: '/resources/bot/'
+      USER_URL: 'https://rdr.stormdigital.win/click?pid=1511&offer_id=348&l=1609929341&sub1=suchimauz'
+      BOT_TOKEN: '1362311778:AAHC79mhbWqDHlo4ouCvEA2kFJBZhOePJ2Q'
+      IMM_HOST: 'get-bonuses.click'
+      IMM_PORT: 80
+    network_mode: host
+    depends_on:
+      - db
+  db:
+    container_name: db
+    image: postgres:12.1
+    ports:
+      - "5429:5432"
+    environment:
+      POSTGRES_USER:     postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB:       postgres
+    volumes:
+      - "./pgdata:/var/lib/postgresql/data"
+
+volumes:
+  pgdata:
+    driver: local
